@@ -1,12 +1,21 @@
-import { Monaco } from "@monaco-editor/react";
+// ✅ Import Monaco core type properly
+import type * as monaco from "monaco-editor";
 import { Id } from "../../convex/_generated/dataModel";
 
+/** Define Theme */
 export interface Theme {
   id: string;
   label: string;
   color: string;
 }
 
+/** Define LanguageRuntime */
+export interface LanguageRuntime {
+  language: string;
+  version: string;
+}
+
+/** Define single Language config */
 export interface Language {
   id: string;
   label: string;
@@ -16,11 +25,7 @@ export interface Language {
   pistonRuntime: LanguageRuntime;
 }
 
-export interface LanguageRuntime {
-  language: string;
-  version: string;
-}
-
+/** Define ExecuteCode API response */
 export interface ExecuteCodeResponse {
   compile?: {
     output: string;
@@ -31,12 +36,14 @@ export interface ExecuteCodeResponse {
   };
 }
 
+/** Execution result stored in Zustand store */
 export interface ExecutionResult {
   code: string;
   output: string;
   error: string | null;
 }
 
+/** ✅ Zustand store state + actions */
 export interface CodeEditorState {
   language: string;
   output: string;
@@ -44,10 +51,10 @@ export interface CodeEditorState {
   error: string | null;
   theme: string;
   fontSize: number;
-  editor: Monaco | null;
+  editor: monaco.editor.IStandaloneCodeEditor | null;
   executionResult: ExecutionResult | null;
 
-  setEditor: (editor: Monaco) => void;
+  setEditor: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   getCode: () => string;
   setLanguage: (language: string) => void;
   setTheme: (theme: string) => void;
@@ -55,6 +62,7 @@ export interface CodeEditorState {
   runCode: () => Promise<void>;
 }
 
+/** Snippet model */
 export interface Snippet {
   _id: Id<"snippets">;
   _creationTime: number;

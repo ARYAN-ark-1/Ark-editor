@@ -344,7 +344,17 @@ export const THEMES: Theme[] = [
   { id: "solarized-dark", label: "Solarized Dark", color: "#002b36" },
 ];
 
-export const THEME_DEFINITONS = {
+type BuiltinMonacoTheme = "vs" | "vs-dark" | "hc-black";
+
+export const THEME_DEFINITIONS: Record<
+  string,
+  {
+    base: BuiltinMonacoTheme;
+    inherit: boolean;
+    rules: { token: string; foreground: string }[];
+    colors: Record<string, string>;
+  }
+> = {
   "github-dark": {
     base: "vs-dark",
     inherit: true,
@@ -420,8 +430,9 @@ export const THEME_DEFINITONS = {
 };
 
 // Helper function to define themes in Monaco
+// Helper function to define themes in Monaco
 export const defineMonacoThemes = (monaco: Monaco) => {
-  Object.entries(THEME_DEFINITONS).forEach(([themeName, themeData]) => {
+  Object.entries(THEME_DEFINITIONS).forEach(([themeName, themeData]) => {
     monaco.editor.defineTheme(themeName, {
       base: themeData.base,
       inherit: themeData.inherit,
