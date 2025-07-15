@@ -1,6 +1,6 @@
 import { create } from "zustand";
+import * as monaco from "monaco-editor";
 import { LANGUAGE_CONFIG } from "@/app/(root)/_constants";
-import type { editor as MonacoEditor } from "monaco-editor"; // ✅ Correct type import
 
 export interface CodeEditorState {
   language: string;
@@ -9,18 +9,21 @@ export interface CodeEditorState {
   output: string;
   isRunning: boolean;
   error: string | null;
-  editor: MonacoEditor.IStandaloneCodeEditor | null; // ✅ Correct type here!
   executionResult: any;
 
+  editor: monaco.editor.IStandaloneCodeEditor | null;
+
   getCode: () => string;
-  setEditor: (editor: MonacoEditor.IStandaloneCodeEditor) => void;
+
+  setEditor: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+
   setTheme: (theme: string) => void;
   setFontSize: (fontSize: number) => void;
   setLanguage: (language: string) => void;
+
   runCode: () => Promise<void>;
 }
 
-// ✅ Handles SSR: don’t call localStorage on server
 const getInitialState = () => {
   if (typeof window === "undefined") {
     return {
@@ -45,12 +48,13 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     output: "",
     isRunning: false,
     error: null,
-    editor: null,
     executionResult: null,
+
+    editor: null,
 
     getCode: () => get().editor?.getValue() || "",
 
-    setEditor: (editor: MonacoEditor.IStandaloneCodeEditor) => {
+    setEditor: (editor) => {
       const savedCode = localStorage.getItem(`editor-code-${get().language}`);
       if (savedCode) {
         editor.setValue(savedCode);
@@ -58,17 +62,17 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
       set({ editor });
     },
 
-    setTheme: (theme: string) => {
+    setTheme: (theme) => {
       localStorage.setItem("editor-theme", theme);
       set({ theme });
     },
 
-    setFontSize: (fontSize: number) => {
+    setFontSize: (fontSize) => {
       localStorage.setItem("editor-font-size", fontSize.toString());
       set({ fontSize });
     },
 
-    setLanguage: (language: string) => {
+    setLanguage: (language) => {
       const currentCode = get().editor?.getValue();
       if (currentCode) {
         localStorage.setItem(`editor-code-${get().language}`, currentCode);
@@ -84,7 +88,6 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     runCode: async () => {
       const { language, getCode } = get();
       const code = getCode();
-
       if (!code) {
         set({ error: "Please enter some code" });
         return;
@@ -105,13 +108,9 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
         });
 
         const data = await response.json();
-        console.log("data back from piston:", data);
 
         if (data.message) {
-          set({
-            error: data.message,
-            executionResult: { code, output: "", error: data.message },
-          });
+          set({ error: data.message, executionResult: { code, output: "", error: data.message } });
           return;
         }
 
@@ -127,15 +126,15 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
           return;
         }
 
-        const output = data.run.output.trim();
-        set({ output, error: null, executionResult: { code, output, error: null } });
-
+        const output = data.run.output;
+        set({
+          output: output.trim(),
+          error: null,
+          executionResult: { code, output: output.trim(), error: null },
+        });
       } catch (error) {
         console.log("Error running code:", error);
-        set({
-          error: "Error running code",
-          executionResult: { code, output: "", error: "Error running code" },
-        });
+        set({ error: "Error running code", executionResult: { code, output: "", error: "Error running code" } });
       } finally {
         set({ isRunning: false });
       }
@@ -143,4 +142,5 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
   };
 });
 
+// ✅ Export this for your RunButton or anywhere
 export const getExecutionResult = () => useCodeEditorStore.getState().executionResult;
