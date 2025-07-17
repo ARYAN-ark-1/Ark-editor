@@ -1,4 +1,3 @@
-//hello
 export default {
   providers: [
     {
