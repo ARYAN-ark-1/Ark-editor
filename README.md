@@ -18,7 +18,7 @@ https://ark-editor.vercel.app/
 ## 🛠️ Tech Stack
 
 - **Frontend:** React.js, Vite, Tailwind CSS
-- **Editor Engine:** Monaco Editor / CodeMirror (based on your implementation)
+- **Editor Engine:** Monaco Editor / CodeMirror 
 - **Deployment:** Vercel / Netlify / GitHub Pages
 
 ## 🚀 Getting Started
